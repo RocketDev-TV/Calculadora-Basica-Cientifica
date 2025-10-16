@@ -23,24 +23,22 @@ class Calculadora {
 
     agregarNumero(numero) {
         if (numero === '.' && this.operacionActual.includes('.')) return;
-        
+        if (this.operacionAnterior.includes('=')) {
+            this.operacionAnterior = ''; 
+        }
+
         if (this.esNuevoNumero || this.operacionActual === '0') {
             this.operacionActual = numero === '.' ? '0.' : numero;
             this.esNuevoNumero = false;
         } else {
             this.operacionActual += numero;
         }
-        
-        // Limpiar la operación anterior cuando se empieza a escribir un nuevo número
-        if (this.operacionAnterior.includes('=')) {
-            this.operacionAnterior = '';
-        }
     }
 
     elegirOperacion(operacion) {
         if (this.operacionActual === '') return;
         
-        if (this.operacionAnterior !== '') {
+        if (this.operacionAnterior !== '' && !this.operacionAnterior.includes('=')) {
             this.calcular();
         }
         
@@ -51,11 +49,15 @@ class Calculadora {
     }
 
     calcular() {
-        let calculo;
-        const anterior = parseFloat(this.operacionAnterior);
+        const anteriorStr = this.operacionAnterior.split(' ')[0]; 
+        const operacionCompleta = this.operacionAnterior + ' ' + this.operacionActual;
+        
+        const anterior = parseFloat(anteriorStr);
         const actual = parseFloat(this.operacionActual);
         
         if (isNaN(anterior) || isNaN(actual)) return;
+        
+        let calculo;
         
         switch (this.operacion) {
             case '+':
@@ -79,7 +81,7 @@ class Calculadora {
         }
         
         this.operacionActual = calculo.toString();
-        this.operacionAnterior = this.operacionAnterior + ' ' + this.operacionActual + ' =';
+        this.operacionAnterior = operacionCompleta + ' =';
         this.operacion = undefined;
         this.esNuevoNumero = true;
     }
@@ -131,13 +133,13 @@ class Calculadora {
                 resultado = Math.exp(actual);
                 break;
             case 'pi':
-                resultado = Math.PI;
+                resultado = Math.PI.toFixed(6); // Constante
                 break;
             default:
                 return;
         }
         
-        this.operacionActual = resultado.toString();
+        this.operacionActual = parseFloat(resultado).toFixed(8).replace(/\.?0+$/, "");
         this.esNuevoNumero = true;
     }
 
